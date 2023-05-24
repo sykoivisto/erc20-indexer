@@ -20,7 +20,7 @@ function App() {
 
   async function getTokenBalance() {
     const config = {
-      apiKey: '<-- COPY-PASTE YOUR ALCHEMY API KEY HERE -->',
+      apiKey: import.meta.env.REACT_APP_API_KEY, //.env with vite
       network: Network.ETH_MAINNET,
     };
 
