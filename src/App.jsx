@@ -8,6 +8,7 @@ import {
   Input,
   SimpleGrid,
   Text,
+  Spinner,
 } from '@chakra-ui/react';
 import { Alchemy, Network, Utils } from 'alchemy-sdk';
 import { useState } from 'react';
@@ -17,8 +18,10 @@ function App() {
   const [results, setResults] = useState([]);
   const [hasQueried, setHasQueried] = useState(false);
   const [tokenDataObjects, setTokenDataObjects] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   async function getTokenBalance() {
+    setIsLoading(true);
     const config = {
       apiKey: import.meta.env.REACT_APP_API_KEY, //.env with vite
       network: Network.ETH_MAINNET,
@@ -40,6 +43,7 @@ function App() {
 
     setTokenDataObjects(await Promise.all(tokenDataPromises));
     setHasQueried(true);
+    setIsLoading(false);
   }
   return (
     <Box w="100vw">
@@ -81,7 +85,9 @@ function App() {
         </Button>
 
         <Heading my={36}>ERC-20 token balances:</Heading>
-
+        {isLoading ? (
+          <Spinner w={50} h={50} p={20}></Spinner>
+        ) : null}
         {hasQueried ? (
           <SimpleGrid w={'90vw'} columns={4} spacing={24}>
             {results.tokenBalances.map((e, i) => {
@@ -109,7 +115,7 @@ function App() {
             })}
           </SimpleGrid>
         ) : (
-          'Please make a query! This may take a few seconds...'
+          'Please make a query!'
         )}
       </Flex>
     </Box>
