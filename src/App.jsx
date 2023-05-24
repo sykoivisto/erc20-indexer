@@ -9,68 +9,74 @@ import {
   SimpleGrid,
   Text,
   Spinner,
-} from '@chakra-ui/react';
-import { Alchemy, Network, Utils } from 'alchemy-sdk';
-import { useState } from 'react';
+  useToast,
+} from "@chakra-ui/react";
+import { Alchemy, Network, Utils } from "alchemy-sdk";
+import { useState } from "react";
+
+import { ethers } from "ethers";
 
 function App() {
-  const [userAddress, setUserAddress] = useState('');
+  const [userAddress, setUserAddress] = useState("");
   const [results, setResults] = useState([]);
   const [hasQueried, setHasQueried] = useState(false);
   const [tokenDataObjects, setTokenDataObjects] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const toast = useToast();
 
   async function getTokenBalance() {
     setIsLoading(true);
-    const config = {
-      apiKey: import.meta.env.REACT_APP_API_KEY, //.env with vite
-      network: Network.ETH_MAINNET,
-    };
 
-    const alchemy = new Alchemy(config);
-    const data = await alchemy.core.getTokenBalances(userAddress);
+    if (ethers.utils.isAddress(userAddress)) {
+      try {
+        const config = {
+          apiKey: import.meta.env.REACT_APP_API_KEY, //.env with vite
+          network: Network.ETH_MAINNET,
+        };
 
-    setResults(data);
+        const alchemy = new Alchemy(config);
+        const data = await alchemy.core.getTokenBalances(userAddress);
 
-    const tokenDataPromises = [];
+        setResults(data);
 
-    for (let i = 0; i < data.tokenBalances.length; i++) {
-      const tokenData = alchemy.core.getTokenMetadata(
-        data.tokenBalances[i].contractAddress
-      );
-      tokenDataPromises.push(tokenData);
+        const tokenDataPromises = [];
+
+        for (let i = 0; i < data.tokenBalances.length; i++) {
+          const tokenData = alchemy.core.getTokenMetadata(
+            data.tokenBalances[i].contractAddress
+          );
+          tokenDataPromises.push(tokenData);
+        }
+
+        setTokenDataObjects(await Promise.all(tokenDataPromises));
+        setHasQueried(true);
+      } catch (err) {
+        console.log(err);
+        toast({
+          title: "Error",
+          description:
+            "An error has occurred. Please check your address and try again",
+          status: "error",
+          duration: 9000,
+          isClosable: true,
+        });
+      }
+    } else {
+      toast({
+        title: "Invalid address",
+        description: "Please enter a valid address",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
     }
-
-    setTokenDataObjects(await Promise.all(tokenDataPromises));
-    setHasQueried(true);
     setIsLoading(false);
   }
   return (
-    <Box w="100vw">
-      <Center>
-        <Flex
-          alignItems={'center'}
-          justifyContent="center"
-          flexDirection={'column'}
-        >
-          <Heading mb={0} fontSize={36}>
-            ERC-20 Token Indexer
-          </Heading>
-          <Text>
-            Plug in an address and this website will return all of its ERC-20
-            token balances!
-          </Text>
-        </Flex>
-      </Center>
-      <Flex
-        w="100%"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent={'center'}
-      >
-        <Heading mt={42}>
-          Get all the ERC-20 token balances of this address:
-        </Heading>
+    <div className="container">
+      <div className="row text-center d-flex flex-column align-items-center align-self-center">
+        <h1>ERC-20 Token Indexer</h1>
+        <p>Get all ERC-20 token balances of this address:</p>
         <Input
           onChange={(e) => setUserAddress(e.target.value)}
           color="black"
@@ -80,23 +86,19 @@ function App() {
           bgColor="white"
           fontSize={24}
         />
-        <Button fontSize={20} onClick={getTokenBalance} mt={36} bgColor="blue">
-          Check ERC-20 Token Balances
-        </Button>
-
-        <Heading my={36}>ERC-20 token balances:</Heading>
-        {isLoading ? (
-          <Spinner w={50} h={50} p={20}></Spinner>
-        ) : null}
+      </div>
+      <div className="row text-center d-flex flex-column align-items-center">
+        <h3>ERC-20 token balances:</h3>
+        {isLoading ? <Spinner w={50} h={50} p={20}></Spinner> : null}
         {hasQueried ? (
-          <SimpleGrid w={'90vw'} columns={4} spacing={24}>
+          <SimpleGrid w={"90vw"} columns={4} spacing={24}>
             {results.tokenBalances.map((e, i) => {
               return (
                 <Flex
-                  flexDir={'column'}
+                  flexDir={"column"}
                   color="white"
                   bg="blue"
-                  w={'20vw'}
+                  w={"20vw"}
                   key={e.id}
                 >
                   <Box>
@@ -115,10 +117,10 @@ function App() {
             })}
           </SimpleGrid>
         ) : (
-          'Please make a query!'
+          "Please make a query!"
         )}
-      </Flex>
-    </Box>
+      </div>
+    </div>
   );
 }
 
