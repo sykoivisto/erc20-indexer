@@ -1,5 +1,5 @@
 # Simple ERC-20 Indexer
-![screenshot](screenshot.jpg)
+![screenshot](screenshot.JPG)
 
 WIP indexer- adding features as I go.
 
