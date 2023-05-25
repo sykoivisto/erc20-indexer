@@ -73,34 +73,31 @@ function App() {
     setIsLoading(false);
   }
   return (
-    <div className="container">
+    <div className="container p-1">
       <div className="row text-center d-flex flex-column align-items-center align-self-center">
-        <h1>ERC-20 Token Indexer</h1>
-        <p>Get all ERC-20 token balances of this address:</p>
+        <h1 className="my-4">ERC-20 Token Indexer</h1>
+        <p className="my-1">Get all ERC-20 token balances of this address:</p>
         <Input
           onChange={(e) => setUserAddress(e.target.value)}
           color="black"
-          w="600px"
           textAlign="center"
           p={4}
           bgColor="white"
           fontSize={24}
+          placeholder={"0x . . ."}
         />
+        <Button fontSize={20} onClick={getTokenBalance} className="mt-2">
+          Check ERC-20 Token Balances
+        </Button>
       </div>
-      <div className="row text-center d-flex flex-column align-items-center">
-        <h3>ERC-20 token balances:</h3>
+      <div className="row text-center d-flex flex-column align-items-center mt-5">
+        <h3 className="mb-3">ERC-20 token balances:</h3>
         {isLoading ? <Spinner w={50} h={50} p={20}></Spinner> : null}
         {hasQueried ? (
-          <SimpleGrid w={"90vw"} columns={4} spacing={24}>
+          <SimpleGrid minChildWidth='120px'>
             {results.tokenBalances.map((e, i) => {
               return (
-                <Flex
-                  flexDir={"column"}
-                  color="white"
-                  bg="blue"
-                  w={"20vw"}
-                  key={e.id}
-                >
+                <div key={i} className="container d-flex flex-column max">
                   <Box>
                     <b>Symbol:</b> ${tokenDataObjects[i].symbol}&nbsp;
                   </Box>
@@ -111,8 +108,8 @@ function App() {
                       tokenDataObjects[i].decimals
                     )}
                   </Box>
-                  <Image src={tokenDataObjects[i].logo} />
-                </Flex>
+                  <Image src={tokenDataObjects[i].logo} height={100} width={100} className="align-self-center"/>
+                </div>
               );
             })}
           </SimpleGrid>
